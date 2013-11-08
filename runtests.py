@@ -25,7 +25,7 @@ from django.test.utils import get_runner
 
 def runtests():
     TestRunner = get_runner(settings)
-    test_runner = TestRunner(verbosity=1, interactive=True, failfast=False)
+    test_runner = TestRunner(verbosity=3, interactive=True, failfast=False)
     failures = test_runner.run_tests(['cache_tools', ])
     sys.exit(failures)
 
