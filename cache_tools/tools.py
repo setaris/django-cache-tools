@@ -39,8 +39,28 @@ def cache_page_in_group(group):
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
-            key_prefix = get_group_key(compute_group_label(group, **kwargs))
+            key_prefix = get_group_key(compute_group_label(group, *args, **kwargs))
             return cache_page(TIME_TO_CACHE, key_prefix=key_prefix)(view_func)(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
+
+def conditional_cache_page_in_group(condition, group):
+    """ Caches a page only if the condition (a callable) evaluates to True
+    """
+
+    def decorator(view_func):
+        @wraps(view_func, assigned=available_attrs(view_func))
+        def _wrapped_view(request, *args, **kwargs):
+            print('in wrapped view')
+            if condition(group, *args, **kwargs):
+                key_prefix = get_group_key(compute_group_label(
+                    group, *args, **kwargs))
+                res = cache_page(TIME_TO_CACHE, key_prefix=key_prefix)(
+                    view_func)(request, *args, **kwargs)
+                print('cache\n' + unicode(cache.get(key_prefix)))
+                return res
+            else:
+                return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
 
